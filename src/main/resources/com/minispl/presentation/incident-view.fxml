@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="16" styleClass="content-area" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.minispl.presentation.IncidentViewController">
+
+    <!-- Header Section -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Security Incidents &amp; Triage (Person A)" styleClass="view-title"/>
+            <Label text="Incident Lifecycle State Machine, Pluggable Risk Strategy &amp; Remediation Commands" styleClass="view-subtitle"/>
+        </VBox>
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Button text="＋ Create Incident" onAction="#handleCreateIncident" styleClass="btn-primary"/>
+            <Label text="Filter Status:" styleClass="detail-label"/>
+            <ComboBox fx:id="cbFilter" prefWidth="130"/>
+            <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
+        </HBox>
+    </HBox>
+
+    <!-- KPI Metric Cards -->
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="TOTAL INCIDENTS" styleClass="stat-label"/>
+            <Label fx:id="lblTotal" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="NEW ALERTS" styleClass="stat-label"/>
+            <Label fx:id="lblNew" text="0" styleClass="stat-value" style="-fx-text-fill: #38bdf8;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="TRIAGED" styleClass="stat-label"/>
+            <Label fx:id="lblTriaged" text="0" styleClass="stat-value" style="-fx-text-fill: #c084fc;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="CONTAINED" styleClass="stat-label"/>
+            <Label fx:id="lblContained" text="0" styleClass="stat-value" style="-fx-text-fill: #fbbf24;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="CLOSED" styleClass="stat-label"/>
+            <Label fx:id="lblClosed" text="0" styleClass="stat-value" style="-fx-text-fill: #34d399;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Table of Incidents -->
+    <TableView fx:id="tblIncidents" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+            <TableColumn fx:id="colTitle" text="Incident Title" prefWidth="270"/>
+            <TableColumn fx:id="colThreat" text="Threat Type" prefWidth="120"/>
+            <TableColumn fx:id="colSeverity" text="Severity" prefWidth="90"/>
+            <TableColumn fx:id="colStatus" text="Lifecycle Status" prefWidth="110"/>
+            <TableColumn fx:id="colPhase" text="Current Phase" prefWidth="130"/>
+            <TableColumn fx:id="colAsset" text="Target Host" prefWidth="140"/>
+            <TableColumn fx:id="colAnalyst" text="Lead Analyst" prefWidth="130"/>
+            <TableColumn fx:id="colRiskScore" text="Risk Score" prefWidth="85"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
+
+    <!-- Detailed Overview & State Machine Transition Panel -->
+    <VBox fx:id="detailPane" styleClass="detail-box" spacing="10">
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <Label text="SELECTED INCIDENT OVERVIEW:" styleClass="detail-label" style="-fx-text-fill: #38bdf8;"/>
+            <Label fx:id="lblDetailTitle" text="Select an incident..." styleClass="detail-value" style="-fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblStatusMessage" text="" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-style: italic;"/>
+        </HBox>
+        <Separator style="-fx-background-color: #334155;"/>
+        <HBox spacing="24">
+            <VBox spacing="4">
+                <Label text="SEVERITY" styleClass="detail-label"/>
+                <Label fx:id="lblDetailSeverity" text="-" styleClass="detail-value"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="LIFECYCLE STATUS" styleClass="detail-label"/>
+                <Label fx:id="lblDetailStatus" text="-" styleClass="detail-value" style="-fx-font-weight: bold;"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="WORKFLOW PHASE" styleClass="detail-label"/>
+                <Label fx:id="lblDetailPhase" text="-" styleClass="detail-value"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="AFFECTED ASSET" styleClass="detail-label"/>
+                <Label fx:id="lblDetailAsset" text="-" styleClass="detail-value"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="ASSIGNED HANDLER" styleClass="detail-label"/>
+                <Label fx:id="lblDetailAnalyst" text="-" styleClass="detail-value"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="RISK SCORE" styleClass="detail-label"/>
+                <Label fx:id="lblDetailRiskScore" text="-" styleClass="detail-value" style="-fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="FIRST DETECTED" styleClass="detail-label"/>
+                <Label fx:id="lblDetailCreatedAt" text="-" styleClass="detail-value"/>
+            </VBox>
+        </HBox>
+
+        <Separator style="-fx-background-color: #334155;"/>
+
+        <!-- Control Action Bar: State Pattern Transitions & Remediation Commands -->
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <!-- State Pattern Transitions: strictly shows valid next transitions -->
+            <HBox fx:id="stateTransitionBox" alignment="CENTER_LEFT" spacing="8">
+                <Label text="State Machine:" styleClass="detail-label" style="-fx-text-fill: #a855f7;"/>
+                <Button fx:id="btnTriage" text="→ Advance to Triaged" onAction="#handleTriageTransition" styleClass="btn-primary"/>
+                <Button fx:id="btnContain" text="→ Mark Contained" onAction="#handleContainTransition" styleClass="btn-warning"/>
+                <Button fx:id="btnClose" text="✔ Close Incident" onAction="#handleCloseTransition" styleClass="btn-success"/>
+                <Label fx:id="lblClosedNotice" text="✔ Investigation Closed (Terminal State)" style="-fx-text-fill: #34d399; -fx-font-weight: bold;"/>
+            </HBox>
+
+            <Separator orientation="VERTICAL" style="-fx-background-color: #334155;"/>
+
+            <!-- Command Pattern Actions (Executed & Undoable) -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Remediation Commands:" styleClass="detail-label" style="-fx-text-fill: #38bdf8;"/>
+                <Button fx:id="btnIsolateHost" text="⚡ Isolate Host" onAction="#handleIsolateHostCommand" styleClass="btn-action"/>
+                <Button fx:id="btnBlockIP" text="🛡 Block IP" onAction="#handleBlockIPCommand" styleClass="btn-action"/>
+                <Button fx:id="btnRevokeCreds" text="🔒 Revoke Creds" onAction="#handleRevokeCredsCommand" styleClass="btn-action"/>
+                <Button fx:id="btnUndoCommand" text="↺ Rollback Action" onAction="#handleUndoCommand" styleClass="btn-secondary"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Delete Incident -->
+            <Button fx:id="btnDelete" text="🗑 Delete" onAction="#handleDeleteIncident" styleClass="btn-danger"/>
+        </HBox>
+    </VBox>
+
+</VBox>
