@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="16" styleClass="content-area" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.minispl.presentation.ReportsViewController">
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Security Operations Analytics &amp; Action Audit Trail (Person B)" styleClass="view-title"/>
+            <Label text="Command pattern execution ledger, reversible rollback engine, and containment metrics" styleClass="view-subtitle"/>
+        </VBox>
+        <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="TOTAL REMEDIATION ACTIONS" styleClass="stat-label"/>
+            <Label fx:id="lblTotalActions" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="ROLLBACK-ELIGIBLE ACTIONS" styleClass="stat-label"/>
+            <Label fx:id="lblUndoableActions" text="0" styleClass="stat-value" style="-fx-text-fill: #34d399;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="MEAN TIME TO CONTAIN (MTTC)" styleClass="stat-label"/>
+            <Label fx:id="lblAvgContainTime" text="-" styleClass="stat-value" style="-fx-text-fill: #38bdf8;"/>
+        </VBox>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="COMMAND EXECUTION &amp; ROLLBACK AUDIT LOG" styleClass="detail-label"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblRollbackMessage" text="" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-style: italic;"/>
+        <Button fx:id="btnRollbackSelected" text="↺ Rollback Selected Action" onAction="#handleRollbackSelected" styleClass="btn-danger"/>
+    </HBox>
+
+    <TableView fx:id="tblAuditLogs" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <columns>
+            <TableColumn fx:id="colId" text="Log ID" prefWidth="65"/>
+            <TableColumn fx:id="colIncident" text="Case #" prefWidth="65"/>
+            <TableColumn fx:id="colCommand" text="Remediation Command" prefWidth="180"/>
+            <TableColumn fx:id="colParams" text="Target Parameters (JSON)" prefWidth="250"/>
+            <TableColumn fx:id="colExecutor" text="Executed By" prefWidth="150"/>
+            <TableColumn fx:id="colTimestamp" text="Executed At" prefWidth="150"/>
+            <TableColumn fx:id="colCanUndo" text="Rollback Feasibility" prefWidth="160"/>
+            <TableColumn fx:id="colStatus" text="State" prefWidth="110"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
+
+</VBox>
