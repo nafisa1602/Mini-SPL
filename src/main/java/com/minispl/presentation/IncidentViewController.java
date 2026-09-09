@@ -280,7 +280,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         try {
             IncidentStateMachine machine = new IncidentStateMachine(selectedIncident, incidentDAO);
             machine.triage(selectedIncident.getPlaybookId(), selectedIncident.getAssignedAnalystId());
-            lblStatusMessage.setText("✓ State Transition: NEW -> TRIAGED (Phase: CONTAINMENT)");
+            lblStatusMessage.setText("State Transition: NEW -> TRIAGED (Phase: CONTAINMENT)");
             refresh();
         } catch (Exception e) {
             showError("State Machine Error", e.getMessage());
@@ -293,7 +293,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         try {
             IncidentStateMachine machine = new IncidentStateMachine(selectedIncident, incidentDAO);
             machine.contain();
-            lblStatusMessage.setText("✓ State Transition: TRIAGED -> CONTAINED (Phase: EVIDENCE_COLLECTION)");
+            lblStatusMessage.setText("State Transition: TRIAGED -> CONTAINED (Phase: EVIDENCE_COLLECTION)");
             refresh();
         } catch (Exception e) {
             showError("State Machine Error", e.getMessage());
@@ -306,7 +306,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         try {
             IncidentStateMachine machine = new IncidentStateMachine(selectedIncident, incidentDAO);
             machine.close();
-            lblStatusMessage.setText("✓ State Transition: CONTAINED -> CLOSED (Case Resolved)");
+            lblStatusMessage.setText("State Transition: CONTAINED -> CLOSED (Case Resolved)");
             refresh();
         } catch (Exception e) {
             showError("State Machine Error", e.getMessage());
@@ -464,7 +464,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
             result.ifPresent(inc -> {
                 try {
                     Incident created = incidentDAO.create(inc);
-                    lblStatusMessage.setText("✓ Created Incident INC-" + created.getId() + " with Risk Score " + created.getRiskScore());
+                    lblStatusMessage.setText("Created Incident INC-" + created.getId() + " with Risk Score " + created.getRiskScore());
                     IncidentEventPublisher.getInstance().publish(new IncidentEvent(
                             IncidentEvent.EventType.INCIDENT_CREATED,
                             created.getId(),
@@ -507,7 +507,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                             selectedIncident.getAssignedAnalystId(),
                             "Deleted incident: " + selectedIncident.getTitle()
                     ));
-                    lblStatusMessage.setText("✓ Deleted Incident INC-" + selectedIncident.getId());
+                    lblStatusMessage.setText("Deleted Incident INC-" + selectedIncident.getId());
                     loadData();
                 }
             } catch (SQLException e) {
@@ -535,7 +535,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
             RemediationCommand cmd = commandFactory.createCommand(IsolateHostCommand.COMMAND_TYPE, selectedIncident.getId(), analystId, params);
             commandInvoker.execute(cmd);
 
-            lblStatusMessage.setText("✓ Action Executed: " + cmd.getStatusMessage());
+            lblStatusMessage.setText("Action Executed: " + cmd.getStatusMessage());
             btnUndoCommand.setDisable(false);
             refresh();
         } catch (Exception e) {
@@ -563,7 +563,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                 RemediationCommand cmd = commandFactory.createCommand(BlockIPCommand.COMMAND_TYPE, selectedIncident.getId(), analystId, params);
                 commandInvoker.execute(cmd);
 
-                lblStatusMessage.setText("✓ Action Executed: " + cmd.getStatusMessage());
+                lblStatusMessage.setText("Action Executed: " + cmd.getStatusMessage());
                 btnUndoCommand.setDisable(false);
                 refresh();
             } catch (Exception e) {
@@ -591,7 +591,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                 RemediationCommand cmd = commandFactory.createCommand(RevokeCredentialsCommand.COMMAND_TYPE, selectedIncident.getId(), analystId, params);
                 commandInvoker.execute(cmd);
 
-                lblStatusMessage.setText("✓ Action Executed: " + cmd.getStatusMessage());
+                lblStatusMessage.setText("Action Executed: " + cmd.getStatusMessage());
                 btnUndoCommand.setDisable(false);
                 refresh();
             } catch (Exception e) {
@@ -604,7 +604,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
     public void handleUndoCommand() {
         try {
             RemediationCommand undone = commandInvoker.undoLast();
-            lblStatusMessage.setText("↺ Rollback Executed: " + undone.getStatusMessage());
+            lblStatusMessage.setText("Rollback Executed: " + undone.getStatusMessage());
             btnUndoCommand.setDisable(!commandInvoker.canUndo());
             refresh();
         } catch (Exception e) {

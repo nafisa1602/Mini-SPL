@@ -1,27 +1,27 @@
-# ⚡ DFIR Orchestrator (Mini-SPL)
+# DFIR Orchestrator (Mini-SPL)
 
 > **Desktop Incident Response & Digital Forensics Playbook Engine**  
 > Built with **JavaFX (FXML)**, **SQLite (JDBC)**, and **Maven** for the Design Patterns Lab (SE 2215), Institute of Information Technology (IIT), University of Dhaka.
 
 ---
 
-## 🎯 Problem Statement & What It Does
+## Problem Statement & What It Does
 
 Security Operations Center (SOC) and Digital Forensics & Incident Response (DFIR) teams responding to active cyber incidents (such as ransomware outbreaks or credential phishing) must execute rapid, disciplined workflows while preserving an immutable chain of custody for legal and audit scrutiny. Mishandling either aspect risks uncontained threats or evidence dismissal in court.
 
 **DFIR Orchestrator** automates and enforces strict incident response lifecycles:
 
-1. **🚨 Incident Intake & Triage:** Analysts catalog incidents and automatically compute threat severity scores using pluggable algorithmic models.
-2. **📖 Enforced Playbooks (Template Method):** Enforces an invariant 5-phase investigation lifecycle (**Triage → Containment → Evidence Collection → Eradication → Post-Mortem**). Phases cannot be skipped out of order; threat-specific engines branch into concrete, tailored remediation steps.
-3. **↺ Reversible Remediation Actions (Command Pattern):** Actions such as isolating a host, blocking an IP, or revoking credentials are encapsulated into reversible commands with one-click rollback capabilities recorded in an audit ledger.
-4. **📦 Evidence Chain of Custody (State Pattern):** Cryptographic digests and physical artifacts are strictly tracked through custody states (**Seized → In Analysis → Court Hold → Archived**).
-5. **🔒 Cryptographic SHA-256 / SHA-512 Integrity Verifier (Strategy Pattern):** Real-time hash computation with interchangeable algorithm strategies over actual disk artifacts to certify evidence integrity.
-6. **🖥️ Infrastructure Asset Inventory:** Endpoint management with full CRUD, criticality classification, and instant network quarantine controls.
-7. **📊 Real-time MTTC Analytics & Reporting:** Dynamically calculates true **Mean Time to Contain (MTTC)** across historical incidents and provides 1-click export to Markdown Dossiers and compliance CSV logs.
+1. **Incident Intake & Triage:** Analysts catalog incidents and automatically compute threat severity scores using pluggable algorithmic models.
+2. **Enforced Playbooks (Template Method):** Enforces an invariant 5-phase investigation lifecycle (**Triage → Containment → Evidence Collection → Eradication → Post-Mortem**). Phases cannot be skipped out of order; threat-specific engines branch into concrete, tailored remediation steps.
+3. **Reversible Remediation Actions (Command Pattern):** Actions such as isolating a host, blocking an IP, or revoking credentials are encapsulated into reversible commands with one-click rollback capabilities recorded in an audit ledger.
+4. **Evidence Chain of Custody (State Pattern):** Cryptographic digests and physical artifacts are strictly tracked through custody states (**Seized → In Analysis → Court Hold → Archived**).
+5. **Cryptographic SHA-256 / SHA-512 Integrity Verifier (Strategy Pattern):** Real-time hash computation with interchangeable algorithm strategies over actual disk artifacts to certify evidence integrity.
+6. **Infrastructure Asset Inventory:** Endpoint management with full CRUD, criticality classification, and instant network quarantine controls.
+7. **Real-time MTTC Analytics & Reporting:** Dynamically calculates true **Mean Time to Contain (MTTC)** across historical incidents and provides 1-click export to Markdown Dossiers and compliance CSV logs.
 
 ---
 
-## 🧩 Design Patterns Catalog
+## Design Patterns Catalog
 
 | Design Pattern | Key Classes | Problem Addressed & Architectural Benefit |
 | :--- | :--- | :--- |
@@ -36,7 +36,7 @@ Security Operations Center (SOC) and Digital Forensics & Incident Response (DFIR
 
 ---
 
-## 🏛️ Application Architecture
+## Application Architecture
 
 ```text
 com.minispl/
@@ -67,17 +67,17 @@ com.minispl/
 
 ---
 
-## 🖥️ Major Application Consoles (5 Screens)
+## Major Application Consoles (5 Screens)
 
-1. **🚨 Incidents & Triage Console:** Lifecycle state transitions (`Triage`, `Contain`, `Close`), multi-criteria real-time keyword search, dual status/severity filtering, and CVSS vs. NIST scoring recalculation.
-2. **📦 Evidence & Chain of Custody Console:** Forensic evidence cataloging, custody transitions (`Begin Analysis`, `Place Court Hold`, `Release`, `Archive`), and cryptographic SHA-256 integrity verification against actual disk files.
-3. **🖥️ Infrastructure Assets & Inventory Console:** Complete endpoint CRUD (Create, Read, Update, Delete), criticality tiering, and 1-click network quarantine/isolation toggling.
-4. **📖 IR Playbooks Console:** Interactive Template Method execution for Ransomware and Phishing threats, step-by-step pass/fail verification, and execution summaries.
-5. **📊 Audit & Analytics Console:** Real Mean Time to Contain (MTTC) calculation, reversible command rollback ledger, 1-click **Export Forensic Dossier (.md)**, and **Export Audit CSV (.csv)**.
+1. **Incidents & Triage Console:** Lifecycle state transitions (`Triage`, `Contain`, `Close`), multi-criteria real-time keyword search, dual status/severity filtering, and CVSS vs. NIST scoring recalculation.
+2. **Evidence & Chain of Custody Console:** Forensic evidence cataloging, custody transitions (`Begin Analysis`, `Place Court Hold`, `Release`, `Archive`), and cryptographic SHA-256 integrity verification against actual disk files.
+3. **Infrastructure Assets & Inventory Console:** Complete endpoint CRUD (Create, Read, Update, Delete), criticality tiering, and 1-click network quarantine/isolation toggling.
+4. **IR Playbooks Console:** Interactive Template Method execution for Ransomware and Phishing threats, step-by-step pass/fail verification, and execution summaries.
+5. **Audit & Analytics Console:** Real Mean Time to Contain (MTTC) calculation, reversible command rollback ledger, 1-click **Export Forensic Dossier (.md)**, and **Export Audit CSV (.csv)**.
 
 ---
 
-## 🗄️ Database Schema & Entities
+## Database Schema & Entities
 
 The SQLite database (`dfir_orchestrator.db`) is automatically seeded on startup with relational constraints and foreign keys (`PRAGMA foreign_keys = ON;`):
 
@@ -91,7 +91,7 @@ The SQLite database (`dfir_orchestrator.db`) is automatically seeded on startup 
 
 ---
 
-## 🧪 Comprehensive Automated Test Suite (49 Tests)
+## Comprehensive Automated Test Suite (52 Tests)
 
 Run the full suite:
 
@@ -112,7 +112,7 @@ All 49 unit and integration tests pass cleanly:
 
 ---
 
-## 🚀 Running the Application
+## Running the Application
 
 ### Prerequisites
 * **Java JDK 21+**

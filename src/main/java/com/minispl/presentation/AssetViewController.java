@@ -260,7 +260,7 @@ public class AssetViewController implements Refreshable, IncidentEventListener {
                         1,
                         "Registered new asset " + created.getHostname() + " (" + created.getIpAddress() + ")"
                 ));
-                lblStatusMessage.setText("✓ Registered asset: " + created.getHostname());
+                lblStatusMessage.setText("Registered asset: " + created.getHostname());
                 loadData();
             } catch (SQLException e) {
                 showError("Registration Failed", e.getMessage());
@@ -338,7 +338,7 @@ public class AssetViewController implements Refreshable, IncidentEventListener {
                             1,
                             "Updated configuration for asset " + updated.getHostname()
                     ));
-                    lblStatusMessage.setText("✓ Updated asset: " + updated.getHostname());
+                    lblStatusMessage.setText("Updated asset: " + updated.getHostname());
                     loadData();
                 }
             } catch (SQLException e) {
@@ -375,7 +375,7 @@ public class AssetViewController implements Refreshable, IncidentEventListener {
                             1,
                             actionWord + " asset " + selectedAsset.getHostname() + " (" + selectedAsset.getIpAddress() + ")"
                     ));
-                    lblStatusMessage.setText("✓ " + actionWord + " executed for " + selectedAsset.getHostname());
+                    lblStatusMessage.setText(actionWord + " executed for " + selectedAsset.getHostname());
                     loadData();
                 }
             } catch (SQLException e) {
@@ -406,7 +406,7 @@ public class AssetViewController implements Refreshable, IncidentEventListener {
                             1,
                             "Decommissioned asset " + selectedAsset.getHostname()
                     ));
-                    lblStatusMessage.setText("✓ Decommissioned asset " + selectedAsset.getHostname());
+                    lblStatusMessage.setText("Decommissioned asset " + selectedAsset.getHostname());
                     selectedAsset = null;
                     loadData();
                 } else {

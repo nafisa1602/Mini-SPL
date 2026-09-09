@@ -235,10 +235,10 @@ public class ReportsViewController implements Refreshable, IncidentEventListener
             try {
                 boolean ok = commandInvoker.undoByAuditLogId(selectedLog.getId());
                 if (ok) {
-                    lblRollbackMessage.setText("✓ Successfully rolled back Action #" + selectedLog.getId() + " (" + selectedLog.getCommandType() + ")");
+                    lblRollbackMessage.setText("Successfully rolled back Action #" + selectedLog.getId() + " (" + selectedLog.getCommandType() + ")");
                     loadData();
                 } else {
-                    lblRollbackMessage.setText("⚠ Rollback could not be completed.");
+                    lblRollbackMessage.setText("Rollback could not be completed.");
                 }
             } catch (Exception e) {
                 showAlert(Alert.AlertType.ERROR, "Rollback Failed", e.getMessage());
@@ -263,7 +263,7 @@ public class ReportsViewController implements Refreshable, IncidentEventListener
         if (targetFile != null) {
             try (FileWriter writer = new FileWriter(targetFile)) {
                 writer.write(markdown);
-                lblRollbackMessage.setText("✓ Exported Forensic Dossier: " + targetFile.getName());
+                lblRollbackMessage.setText("Exported Forensic Dossier: " + targetFile.getName());
                 showAlert(Alert.AlertType.INFORMATION, "Export Successful", "Forensic Dossier saved to:\n" + targetFile.getAbsolutePath());
             } catch (IOException e) {
                 showAlert(Alert.AlertType.ERROR, "Export Failed", e.getMessage());
@@ -288,7 +288,7 @@ public class ReportsViewController implements Refreshable, IncidentEventListener
         if (targetFile != null) {
             try (FileWriter writer = new FileWriter(targetFile)) {
                 writer.write(csv);
-                lblRollbackMessage.setText("✓ Exported Audit CSV: " + targetFile.getName());
+                lblRollbackMessage.setText("Exported Audit CSV: " + targetFile.getName());
                 showAlert(Alert.AlertType.INFORMATION, "Export Successful", "Audit Ledger saved to:\n" + targetFile.getAbsolutePath());
             } catch (IOException e) {
                 showAlert(Alert.AlertType.ERROR, "Export Failed", e.getMessage());
@@ -298,7 +298,7 @@ public class ReportsViewController implements Refreshable, IncidentEventListener
 
     public String generateForensicDossierMarkdown() {
         StringBuilder sb = new StringBuilder();
-        sb.append("# ⚡ DFIR Investigation Dossier & Security Post-Mortem\n\n");
+        sb.append("# DFIR Investigation Dossier & Security Post-Mortem\n\n");
         sb.append("**Generated At:** ").append(LocalDateTime.now().toString().replace("T", " ")).append("\n");
         sb.append("**Lead Investigator:** Alice Walker (Senior DFIR Analyst)\n\n");
         sb.append("---\n\n");

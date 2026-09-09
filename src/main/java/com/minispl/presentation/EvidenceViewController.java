@@ -193,7 +193,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.beginAnalysis(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: SEIZED -> IN_ANALYSIS");
+            lblCustodyMessage.setText("Custody Transition: SEIZED -> IN_ANALYSIS");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -206,7 +206,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.placeOnCourtHold(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: IN_ANALYSIS -> COURT_HOLD (Judicial Freeze)");
+            lblCustodyMessage.setText("Custody Transition: IN_ANALYSIS -> COURT_HOLD (Judicial Freeze)");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -219,7 +219,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.releaseFromCourtHold(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: COURT_HOLD -> IN_ANALYSIS (Hold Released)");
+            lblCustodyMessage.setText("Custody Transition: COURT_HOLD -> IN_ANALYSIS (Hold Released)");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -232,7 +232,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.archive(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: -> ARCHIVED (Cold Vault Sealed)");
+            lblCustodyMessage.setText("Custody Transition: -> ARCHIVED (Cold Vault Sealed)");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -309,7 +309,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
             txtHash.setPromptText("SHA-256 Hash hex string");
             txtHash.setText(generateDemoSha256("artifact-" + System.currentTimeMillis()));
 
-            Button btnGenHash = new Button("⚡ Generate Random Hash");
+            Button btnGenHash = new Button("Generate Random Hash");
             btnGenHash.setStyle("-fx-font-size: 11px;");
             btnGenHash.setOnAction(e -> txtHash.setText(generateDemoSha256(txtName.getText() + System.nanoTime())));
 
@@ -369,7 +369,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
             res.ifPresent(item -> {
                 try {
                     EvidenceItem created = evidenceDAO.create(item);
-                    lblCustodyMessage.setText("✓ Cataloged Evidence Item #" + created.getId() + " in SEIZED custody state.");
+                    lblCustodyMessage.setText("Cataloged Evidence Item #" + created.getId() + " in SEIZED custody state.");
                     IncidentEventPublisher.getInstance().publish(new IncidentEvent(
                             IncidentEvent.EventType.EVIDENCE_CREATED,
                             created.getIncidentId(),
@@ -412,7 +412,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
                             selectedItem.getCurrentCustodianId(),
                             "Deleted evidence artifact: " + selectedItem.getEvidenceName()
                     ));
-                    lblCustodyMessage.setText("✓ Deleted Artifact #" + selectedItem.getId());
+                    lblCustodyMessage.setText("Deleted Artifact #" + selectedItem.getId());
                     loadData();
                 }
             } catch (SQLException e) {
@@ -506,17 +506,17 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
                         1,
                         "SHA-256 verified for Artifact #" + selectedItem.getId() + " (" + selectedItem.getEvidenceName() + ")"
                 ));
-                lblCustodyMessage.setText("✓ Cryptographic integrity verified: SHA-256 match confirmed.");
+                lblCustodyMessage.setText("Cryptographic integrity verified: SHA-256 match confirmed.");
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Integrity Verified");
-                alert.setHeaderText("✓ Cryptographic Integrity Confirmed");
+                alert.setHeaderText("Cryptographic Integrity Confirmed");
                 alert.setContentText("Artifact SHA-256 hash matches the database chain of custody ledger perfectly.\n\nHash: " + hash + "\n\nIntegrity Status: UNTAMPERED");
                 alert.showAndWait();
             } else {
-                lblCustodyMessage.setText("⚠ INTEGRITY ALERT: SHA-256 hash mismatch detected!");
+                lblCustodyMessage.setText("INTEGRITY ALERT: SHA-256 hash mismatch detected!");
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Integrity Warning");
-                alert.setHeaderText("⚠ Cryptographic Hash Mismatch Detected!");
+                alert.setHeaderText("Cryptographic Hash Mismatch Detected!");
                 alert.setContentText("The provided hash does NOT match the stored chain of custody record!\n\nExpected: " + selectedItem.getFileHash() + "\nActual:   " + hash + "\n\nWarning: The evidence artifact may have been modified or corrupted.");
                 alert.showAndWait();
             }

@@ -63,7 +63,7 @@ public class PlaybookViewController implements Refreshable, IncidentEventListene
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText("🛡  " + item.getThreatType() + " Playbook");
+                    setText(item.getThreatType() + " Playbook");
                 }
             }
         });
@@ -159,7 +159,7 @@ public class PlaybookViewController implements Refreshable, IncidentEventListene
             InvestigationReport report = engine.executePlaybook(target);
 
             if (lblExecutionStatus != null) {
-                lblExecutionStatus.setText("✓ Template Method Executed: 5/5 phases completed for Case #" + target.getId());
+                lblExecutionStatus.setText("Template Method Executed: 5/5 phases completed for Case #" + target.getId());
             }
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

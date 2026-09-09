@@ -13,7 +13,7 @@
             <Label text="Endpoint registration, criticality tiering, quarantine controls, and inventory CRUD" styleClass="view-subtitle"/>
         </VBox>
         <Button text="+ Register Asset" onAction="#handleNewAsset" styleClass="btn-primary"/>
-        <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
+        <Button text="Refresh" onAction="#refresh" styleClass="btn-secondary"/>
     </HBox>
 
     <HBox spacing="12">
