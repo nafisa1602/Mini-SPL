@@ -21,9 +21,15 @@
 
         <!-- Right: Step Execution Ledger -->
         <VBox spacing="12" style="-fx-padding: 0 0 0 10;">
-            <VBox styleClass="detail-box" spacing="4">
-                <Label fx:id="lblPlaybookTitle" text="Select Playbook" styleClass="view-title" style="-fx-font-size: 16px;"/>
-                <Label fx:id="lblPlaybookDescription" text="Description" styleClass="detail-value" wrapText="true"/>
+            <VBox styleClass="detail-box" spacing="6">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label fx:id="lblPlaybookTitle" text="Select Playbook" styleClass="view-title" style="-fx-font-size: 16px;"/>
+                        <Label fx:id="lblPlaybookDescription" text="Description" styleClass="detail-value" wrapText="true"/>
+                    </VBox>
+                    <Button fx:id="btnExecutePlaybook" text="▶ Run Engine (Template Method)" onAction="#handleExecutePlaybook" styleClass="btn-primary"/>
+                </HBox>
+                <Label fx:id="lblExecutionStatus" text="" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-style: italic;"/>
             </VBox>
 
             <Label text="MANDATORY INVESTIGATION &amp; REMEDIATION PHASES" styleClass="detail-label"/>

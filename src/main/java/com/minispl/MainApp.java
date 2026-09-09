@@ -1,5 +1,6 @@
 package com.minispl;
 
+import com.minispl.application.observer.AuditTrailListener;
 import com.minispl.persistence.DatabaseManager;
 import com.minispl.persistence.DatabaseSeeder;
 import javafx.application.Application;
@@ -15,6 +16,7 @@ public class MainApp extends Application {
         // Initialize SQLite schema and populate baseline seed data if empty
         DatabaseManager.getInstance().initializeDatabase();
         new DatabaseSeeder().seedIfEmpty();
+        AuditTrailListener.register();
     }
 
     @Override
