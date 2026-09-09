@@ -95,7 +95,11 @@ public class AssetViewController implements Refreshable, IncidentEventListener {
             event.getType() == IncidentEvent.EventType.ASSET_CREATED ||
             event.getType() == IncidentEvent.EventType.ASSET_UPDATED ||
             event.getType() == IncidentEvent.EventType.ASSET_DELETED) {
-            Platform.runLater(this::refresh);
+            if (Platform.isFxApplicationThread()) {
+                refresh();
+            } else {
+                Platform.runLater(this::refresh);
+            }
         }
     }
 
