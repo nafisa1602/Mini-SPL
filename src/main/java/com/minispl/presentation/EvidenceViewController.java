@@ -4,6 +4,7 @@ import com.minispl.application.evidence.EvidenceCustodyStateMachine;
 import com.minispl.application.observer.IncidentEvent;
 import com.minispl.application.observer.IncidentEventListener;
 import com.minispl.application.observer.IncidentEventPublisher;
+import com.minispl.application.strategy.*;
 import com.minispl.domain.enums.CustodyStatus;
 import com.minispl.domain.model.Asset;
 import com.minispl.domain.model.EvidenceItem;
@@ -446,6 +447,9 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         tfInputHash.setPromptText("Paste expected SHA-256 hash or choose file...");
         tfInputHash.setPrefWidth(320);
 
+        ComboBox<String> cbAlgo = new ComboBox<>(FXCollections.observableArrayList("SHA-256", "SHA-512"));
+        cbAlgo.setValue("SHA-256");
+
         Button btnBrowse = new Button("Browse File...");
         btnBrowse.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
@@ -454,7 +458,11 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
                 File file = chooser.showOpenDialog(dialog.getDialogPane().getScene().getWindow());
                 if (file != null) {
                     try {
-                        String computed = computeFileSHA256(file);
+                        HashingStrategy strategy = "SHA-512".equalsIgnoreCase(cbAlgo.getValue())
+                                ? new Sha512HashingStrategy()
+                                : new Sha256HashingStrategy();
+                        HashingContext hashingContext = new HashingContext(strategy);
+                        String computed = hashingContext.computeFileHash(file);
                         tfInputHash.setText(computed);
                     } catch (Exception ex) {
                         showError("Hash Error", "Failed to compute file hash: " + ex.getMessage());
@@ -465,10 +473,12 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
 
         HBox inputRow = new HBox(8, tfInputHash, btnBrowse);
 
-        grid.add(new Label("Custody Record Hash:"), 0, 0);
-        grid.add(lblExpected, 1, 0);
-        grid.add(new Label("Verification Hash / File:"), 0, 1);
-        grid.add(inputRow, 1, 1);
+        grid.add(new Label("Hashing Strategy:"), 0, 0);
+        grid.add(cbAlgo, 1, 0);
+        grid.add(new Label("Custody Record Hash:"), 0, 1);
+        grid.add(lblExpected, 1, 1);
+        grid.add(new Label("Verification Hash / File:"), 0, 2);
+        grid.add(inputRow, 1, 2);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -514,22 +524,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
     }
 
     public static String computeFileSHA256(File file) throws Exception {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (FileInputStream fis = new FileInputStream(file)) {
-            byte[] byteArray = new byte[8192];
-            int bytesCount;
-            while ((bytesCount = fis.read(byteArray)) != -1) {
-                digest.update(byteArray, 0, bytesCount);
-            }
-        }
-        byte[] bytes = digest.digest();
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) sb.append('0');
-            sb.append(hex);
-        }
-        return sb.toString();
+        return new HashingContext(new Sha256HashingStrategy()).computeFileHash(file);
     }
 
     private String generateDemoSha256(String seed) {
