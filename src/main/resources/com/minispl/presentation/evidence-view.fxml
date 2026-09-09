@@ -15,6 +15,7 @@
         </VBox>
         <HBox alignment="CENTER_RIGHT" spacing="10">
             <Button text="＋ Catalog Evidence" onAction="#handleCreateEvidence" styleClass="btn-primary"/>
+            <Button fx:id="btnVerifyIntegrity" text="🔒 Verify Integrity" onAction="#handleVerifyIntegrity" styleClass="btn-secondary"/>
             <Label fx:id="lblTotalArtifacts" text="Total Preserved Artifacts: 0" styleClass="status-badge-connected"/>
             <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
         </HBox>

@@ -8,9 +8,11 @@ import com.minispl.application.remediation.RemediationCommandFactory;
 import com.minispl.domain.enums.AuditStatus;
 import com.minispl.domain.enums.IncidentStatus;
 import com.minispl.domain.model.ActionAuditLog;
+import com.minispl.domain.model.EvidenceItem;
 import com.minispl.domain.model.Incident;
 import com.minispl.persistence.dao.AssetDAO;
 import com.minispl.persistence.dao.AuditLogDAO;
+import com.minispl.persistence.dao.EvidenceDAO;
 import com.minispl.persistence.dao.IncidentDAO;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -20,7 +22,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -49,6 +55,7 @@ public class ReportsViewController implements Refreshable, IncidentEventListener
     private final AuditLogDAO auditLogDAO = new AuditLogDAO();
     private final AssetDAO assetDAO = new AssetDAO();
     private final IncidentDAO incidentDAO = new IncidentDAO();
+    private final EvidenceDAO evidenceDAO = new EvidenceDAO();
     private final RemediationCommandFactory commandFactory = new RemediationCommandFactory(assetDAO);
     private final CommandInvoker commandInvoker = new CommandInvoker(auditLogDAO, commandFactory);
 
@@ -237,6 +244,156 @@ public class ReportsViewController implements Refreshable, IncidentEventListener
                 showAlert(Alert.AlertType.ERROR, "Rollback Failed", e.getMessage());
             }
         }
+    }
+
+    @FXML
+    public void handleExportDossier() {
+        String markdown = generateForensicDossierMarkdown();
+        File targetFile = null;
+        if (tblAuditLogs.getScene() != null && tblAuditLogs.getScene().getWindow() != null) {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Save Forensic Incident Dossier");
+            chooser.setInitialFileName("forensic_investigation_dossier.md");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Markdown Files (*.md)", "*.md"));
+            targetFile = chooser.showSaveDialog(tblAuditLogs.getScene().getWindow());
+        } else {
+            targetFile = new File("forensic_investigation_dossier.md");
+        }
+
+        if (targetFile != null) {
+            try (FileWriter writer = new FileWriter(targetFile)) {
+                writer.write(markdown);
+                lblRollbackMessage.setText("✓ Exported Forensic Dossier: " + targetFile.getName());
+                showAlert(Alert.AlertType.INFORMATION, "Export Successful", "Forensic Dossier saved to:\n" + targetFile.getAbsolutePath());
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Export Failed", e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    public void handleExportCsv() {
+        String csv = generateAuditLedgerCsv(auditList);
+        File targetFile = null;
+        if (tblAuditLogs.getScene() != null && tblAuditLogs.getScene().getWindow() != null) {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Export Action Audit Ledger (CSV)");
+            chooser.setInitialFileName("action_audit_ledger.csv");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+            targetFile = chooser.showSaveDialog(tblAuditLogs.getScene().getWindow());
+        } else {
+            targetFile = new File("action_audit_ledger.csv");
+        }
+
+        if (targetFile != null) {
+            try (FileWriter writer = new FileWriter(targetFile)) {
+                writer.write(csv);
+                lblRollbackMessage.setText("✓ Exported Audit CSV: " + targetFile.getName());
+                showAlert(Alert.AlertType.INFORMATION, "Export Successful", "Audit Ledger saved to:\n" + targetFile.getAbsolutePath());
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Export Failed", e.getMessage());
+            }
+        }
+    }
+
+    public String generateForensicDossierMarkdown() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("# ⚡ DFIR Investigation Dossier & Security Post-Mortem\n\n");
+        sb.append("**Generated At:** ").append(LocalDateTime.now().toString().replace("T", " ")).append("\n");
+        sb.append("**Lead Investigator:** Alice Walker (Senior DFIR Analyst)\n\n");
+        sb.append("---\n\n");
+
+        sb.append("## 1. Executive Summary & KPIs\n");
+        try {
+            List<Incident> incidents = incidentDAO.findAll();
+            List<ActionAuditLog> logs = auditLogDAO.findAll();
+            double mttc = calculateMTTCInMinutes(incidents, logs);
+            sb.append("- **Total Security Incidents:** ").append(incidents.size()).append("\n");
+            sb.append("- **Contained / Resolved Cases:** ").append(incidents.stream().filter(i -> i.getStatus() == IncidentStatus.CONTAINED || i.getStatus() == IncidentStatus.CLOSED).count()).append("\n");
+            sb.append(String.format("- **Mean Time to Contain (MTTC):** %.1f minutes\n", mttc));
+            sb.append("- **Audit Actions Recorded:** ").append(logs.size()).append("\n\n");
+
+            sb.append("## 2. Active & Historical Incident Register\n\n");
+            sb.append("| ID | Incident Title | Threat Type | Severity | Status | Phase | Target Host | Risk Score |\n");
+            sb.append("|---|---|---|---|---|---|---|---|\n");
+            for (Incident inc : incidents) {
+                sb.append(String.format("| #%d | %s | %s | %s | %s | %s | %s | %.1f |\n",
+                        inc.getId(),
+                        inc.getTitle(),
+                        inc.getThreatType(),
+                        inc.getSeverity(),
+                        inc.getStatus(),
+                        inc.getCurrentPhase(),
+                        inc.getAssetHostname() != null ? inc.getAssetHostname() : "Asset #" + inc.getAssetId(),
+                        inc.getRiskScore()
+                ));
+            }
+            sb.append("\n");
+        } catch (SQLException e) {
+            sb.append("Error reading incidents: ").append(e.getMessage()).append("\n\n");
+        }
+
+        sb.append("## 3. Digital Forensics Chain of Custody\n\n");
+        try {
+            List<EvidenceItem> evidence = evidenceDAO.findAll();
+            sb.append("| Evidence ID | Case # | Artifact Name | Type | Custody Status | Cryptographic SHA-256 Hash |\n");
+            sb.append("|---|---|---|---|---|---|\n");
+            for (EvidenceItem item : evidence) {
+                sb.append(String.format("| #%d | Case #%d | %s | %s | %s | `%s` |\n",
+                        item.getId(),
+                        item.getIncidentId(),
+                        item.getEvidenceName(),
+                        item.getEvidenceType(),
+                        item.getCustodyStatus(),
+                        item.getFileHash()
+                ));
+            }
+            sb.append("\n");
+        } catch (SQLException e) {
+            sb.append("Error reading evidence: ").append(e.getMessage()).append("\n\n");
+        }
+
+        sb.append("## 4. Remediation Action Audit Ledger\n\n");
+        try {
+            List<ActionAuditLog> logs = auditLogDAO.findAll();
+            sb.append("| Log ID | Case # | Action Command | Target Parameters | Status | Timestamp |\n");
+            sb.append("|---|---|---|---|---|---|\n");
+            for (ActionAuditLog log : logs) {
+                sb.append(String.format("| #%d | Case #%d | %s | %s | %s | %s |\n",
+                        log.getId(),
+                        log.getIncidentId(),
+                        log.getCommandType(),
+                        log.getParameters(),
+                        log.getStatus(),
+                        log.getTimestamp() != null ? log.getTimestamp().toString().replace("T", " ") : "-"
+                ));
+            }
+            sb.append("\n");
+        } catch (SQLException e) {
+            sb.append("Error reading audit logs: ").append(e.getMessage()).append("\n\n");
+        }
+
+        sb.append("---\n*End of Dossier - Mini-SPL DFIR Platform*\n");
+        return sb.toString();
+    }
+
+    public static String generateAuditLedgerCsv(List<ActionAuditLog> logs) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Log_ID,Incident_ID,Command_Type,Parameters,Executed_By,Timestamp,Can_Undo,Status\n");
+        if (logs != null) {
+            for (ActionAuditLog log : logs) {
+                String safeParams = log.getParameters() != null ? "\"" + log.getParameters().replace("\"", "\"\"") + "\"" : "\"\"";
+                sb.append(log.getId()).append(",")
+                  .append(log.getIncidentId()).append(",")
+                  .append(log.getCommandType()).append(",")
+                  .append(safeParams).append(",")
+                  .append(log.getExecutedById()).append(",")
+                  .append(log.getTimestamp() != null ? log.getTimestamp().toString() : "").append(",")
+                  .append(log.isCanUndo()).append(",")
+                  .append(log.getStatus()).append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

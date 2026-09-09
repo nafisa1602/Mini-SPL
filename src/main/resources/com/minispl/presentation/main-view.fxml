@@ -35,6 +35,7 @@
 
             <Button fx:id="btnNavIncidents" text="🚨  Incidents &amp; Triage" onAction="#showIncidents" styleClass="nav-button"/>
             <Button fx:id="btnNavEvidence" text="📦  Evidence &amp; Custody" onAction="#showEvidence" styleClass="nav-button"/>
+            <Button fx:id="btnNavAssets" text="🖥  Assets &amp; Inventory" onAction="#showAssets" styleClass="nav-button"/>
             <Button fx:id="btnNavPlaybooks" text="📖  IR Playbooks" onAction="#showPlaybooks" styleClass="nav-button"/>
             <Button fx:id="btnNavReports" text="📊  Audit &amp; Analytics" onAction="#showReports" styleClass="nav-button"/>
 
@@ -52,6 +53,11 @@
                     <Label text="Forensic Items:" styleClass="detail-label" HBox.hgrow="ALWAYS"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label fx:id="lblSidebarEvidenceCount" text="0 Items" styleClass="detail-value" style="-fx-font-weight: bold;"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Endpoints:" styleClass="detail-label" HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblSidebarAssetCount" text="0 Hosts" styleClass="detail-value" style="-fx-font-weight: bold;"/>
                 </HBox>
             </VBox>
         </VBox>

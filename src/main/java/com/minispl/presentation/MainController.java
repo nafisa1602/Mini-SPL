@@ -4,6 +4,7 @@ import com.minispl.application.observer.IncidentEvent;
 import com.minispl.application.observer.IncidentEventListener;
 import com.minispl.application.observer.IncidentEventPublisher;
 import com.minispl.domain.enums.IncidentStatus;
+import com.minispl.persistence.dao.AssetDAO;
 import com.minispl.persistence.dao.EvidenceDAO;
 import com.minispl.persistence.dao.IncidentDAO;
 import javafx.application.Platform;
@@ -23,6 +24,7 @@ public class MainController implements IncidentEventListener {
 
     @FXML private Button btnNavIncidents;
     @FXML private Button btnNavEvidence;
+    @FXML private Button btnNavAssets;
     @FXML private Button btnNavPlaybooks;
     @FXML private Button btnNavReports;
 
@@ -30,9 +32,11 @@ public class MainController implements IncidentEventListener {
 
     @FXML private Label lblSidebarOpenCases;
     @FXML private Label lblSidebarEvidenceCount;
+    @FXML private Label lblSidebarAssetCount;
 
     private final IncidentDAO incidentDAO = new IncidentDAO();
     private final EvidenceDAO evidenceDAO = new EvidenceDAO();
+    private final AssetDAO assetDAO = new AssetDAO();
 
     private final Map<String, Node> viewCache = new HashMap<>();
     private final Map<String, Object> controllerCache = new HashMap<>();
@@ -63,6 +67,11 @@ public class MainController implements IncidentEventListener {
     @FXML
     public void showEvidence() {
         switchView("/com/minispl/presentation/evidence-view.fxml", btnNavEvidence);
+    }
+
+    @FXML
+    public void showAssets() {
+        switchView("/com/minispl/presentation/asset-view.fxml", btnNavAssets);
     }
 
     @FXML
@@ -114,8 +123,12 @@ public class MainController implements IncidentEventListener {
         try {
             int openCount = incidentDAO.count() - incidentDAO.countByStatus(IncidentStatus.CLOSED);
             int evidenceCount = evidenceDAO.count();
+            int assetCount = assetDAO.count();
             lblSidebarOpenCases.setText(openCount + " Active");
             lblSidebarEvidenceCount.setText(evidenceCount + " Items");
+            if (lblSidebarAssetCount != null) {
+                lblSidebarAssetCount.setText(assetCount + " Hosts");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

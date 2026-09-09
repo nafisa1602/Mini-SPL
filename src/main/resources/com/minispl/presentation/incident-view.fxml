@@ -15,8 +15,12 @@
         </VBox>
         <HBox alignment="CENTER_RIGHT" spacing="10">
             <Button text="＋ Create Incident" onAction="#handleCreateIncident" styleClass="btn-primary"/>
-            <Label text="Filter Status:" styleClass="detail-label"/>
-            <ComboBox fx:id="cbFilter" prefWidth="130"/>
+            <Label text="Search:" styleClass="detail-label"/>
+            <TextField fx:id="txtSearch" promptText="Search title, threat, host..." prefWidth="180" styleClass="text-field"/>
+            <Label text="Status:" styleClass="detail-label"/>
+            <ComboBox fx:id="cbFilter" prefWidth="120" styleClass="combo-box"/>
+            <Label text="Severity:" styleClass="detail-label"/>
+            <ComboBox fx:id="cbSeverityFilter" prefWidth="120" styleClass="combo-box"/>
             <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
         </HBox>
     </HBox>

@@ -12,6 +12,8 @@
             <Label text="Security Operations Analytics &amp; Action Audit Trail (Person B)" styleClass="view-title"/>
             <Label text="Command pattern execution ledger, reversible rollback engine, and containment metrics" styleClass="view-subtitle"/>
         </VBox>
+        <Button text="📑 Export Dossier (.md)" onAction="#handleExportDossier" styleClass="btn-primary"/>
+        <Button text="📥 Export CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
         <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
     </HBox>
 

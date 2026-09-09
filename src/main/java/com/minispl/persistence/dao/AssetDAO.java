@@ -93,6 +93,29 @@ public class AssetDAO {
         }
     }
 
+    public boolean update(Asset asset) throws SQLException {
+        String sql = "UPDATE assets SET hostname = ?, ip_address = ?, criticality_tier = ?, status = ?, description = ? WHERE id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, asset.getHostname());
+            stmt.setString(2, asset.getIpAddress());
+            stmt.setString(3, asset.getCriticalityTier().name());
+            stmt.setString(4, asset.getStatus().name());
+            stmt.setString(5, asset.getDescription());
+            stmt.setInt(6, asset.getId());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public boolean delete(int id) throws SQLException {
+        String sql = "DELETE FROM assets WHERE id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     public int count() throws SQLException {
         String sql = "SELECT COUNT(*) FROM assets";
         try (Connection conn = dbManager.getConnection();
@@ -100,6 +123,34 @@ public class AssetDAO {
              ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    public int countByStatus(AssetStatus status) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM assets WHERE status = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status.name());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int countByCriticality(CriticalityTier tier) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM assets WHERE criticality_tier = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, tier.name());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         }
         return 0;
