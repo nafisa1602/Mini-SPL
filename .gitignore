@@ -5,11 +5,10 @@ target/
 .DS_Store
 *.log
 
-# Ignore local documentation, diagrams, and generator scripts as requested
-*.pdf
+# Ignore course prompt and temporary assets
+DP Lab Final Project.pdf
 *.docx
 *.jpg
 *.png
-docs/
 generate_er.py
 
