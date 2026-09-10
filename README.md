@@ -112,6 +112,14 @@ All 52 unit and integration tests pass cleanly:
 
 ---
 
+## Project Documentation & Architectural Artifacts
+
+* **Architecture & Technical Specification:** [`DFIR_Orchestrator_Architecture_Specification.pdf`](DFIR_Orchestrator_Architecture_Specification.pdf)
+* **UML Class Diagram:** [`uml.svg`](uml.svg)
+* **Database Entity-Relationship (ER) Diagram:** [`er.svg`](er.svg)
+
+---
+
 ## Running the Application
 
 ### Prerequisites
