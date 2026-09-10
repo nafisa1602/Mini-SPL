@@ -99,12 +99,12 @@ Run the full suite:
 mvn clean test
 ```
 
-All 49 unit and integration tests pass cleanly:
+All 52 unit and integration tests pass cleanly:
 
 * **Observer Pattern Tests (5 tests):** [`ObserverPatternTest.java`](src/test/java/com/minispl/application/ObserverPatternTest.java)
 * **Template Method Playbook Tests (5 tests):** [`TemplateMethodPlaybookTest.java`](src/test/java/com/minispl/application/TemplateMethodPlaybookTest.java)
 * **State Machine Tests (9 tests):** [`IncidentStateMachineTest.java`](src/test/java/com/minispl/application/IncidentStateMachineTest.java), [`EvidenceCustodyStateMachineTest.java`](src/test/java/com/minispl/application/EvidenceCustodyStateMachineTest.java)
-* **Strategy & Command Tests (8 tests):** [`RiskScoringStrategyTest.java`](src/test/java/com/minispl/application/RiskScoringStrategyTest.java), [`RemediationCommandAndFactoryTest.java`](src/test/java/com/minispl/application/RemediationCommandAndFactoryTest.java)
+* **Strategy & Command Tests (11 tests):** [`RiskScoringStrategyTest.java`](src/test/java/com/minispl/application/RiskScoringStrategyTest.java), [`HashingStrategyTest.java`](src/test/java/com/minispl/application/HashingStrategyTest.java), [`RemediationCommandAndFactoryTest.java`](src/test/java/com/minispl/application/RemediationCommandAndFactoryTest.java)
 * **Additional Workflows & Export Tests (5 tests):** [`AdditionalWorkflowsTest.java`](src/test/java/com/minispl/application/AdditionalWorkflowsTest.java)
 * **Analytics & MTTC Tests (4 tests):** [`MTTCCalculationTest.java`](src/test/java/com/minispl/presentation/MTTCCalculationTest.java)
 * **Persistence & DAO Tests (7 tests):** [`DatabaseAndDAOTest.java`](src/test/java/com/minispl/persistence/DatabaseAndDAOTest.java)
