@@ -1,6 +1,9 @@
 package com.minispl.presentation;
 
 import com.minispl.application.incident.IncidentStateMachine;
+import com.minispl.application.observer.IncidentEvent;
+import com.minispl.application.observer.IncidentEventListener;
+import com.minispl.application.observer.IncidentEventPublisher;
 import com.minispl.application.remediation.*;
 import com.minispl.application.strategy.CvssRiskScoringStrategy;
 import com.minispl.application.strategy.NistRiskScoringStrategy;
@@ -14,6 +17,7 @@ import com.minispl.domain.model.Incident;
 import com.minispl.domain.model.Playbook;
 import com.minispl.domain.model.User;
 import com.minispl.persistence.dao.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -33,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class IncidentViewController {
+public class IncidentViewController implements Refreshable, IncidentEventListener {
 
     @FXML private Label lblTotal;
     @FXML private Label lblNew;
@@ -112,10 +116,21 @@ public class IncidentViewController {
         tblIncidents.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> showDetail(newVal));
         tblIncidents.setItems(incidentList);
 
+        IncidentEventPublisher.getInstance().subscribe(this);
         loadData();
     }
 
+    @Override
+    public void onIncidentEvent(IncidentEvent event) {
+        if (Platform.isFxApplicationThread()) {
+            refresh();
+        } else {
+            Platform.runLater(this::refresh);
+        }
+    }
+
     @FXML
+    @Override
     public void refresh() {
         loadData();
     }
@@ -422,6 +437,14 @@ public class IncidentViewController {
                 try {
                     Incident created = incidentDAO.create(inc);
                     lblStatusMessage.setText("✓ Created Incident INC-" + created.getId() + " with Risk Score " + created.getRiskScore());
+                    IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                            IncidentEvent.EventType.INCIDENT_CREATED,
+                            created.getId(),
+                            null,
+                            created.getStatus().name(),
+                            created.getAssignedAnalystId(),
+                            "Created incident: " + created.getTitle()
+                    ));
                     loadData();
                     tblIncidents.getSelectionModel().select(created);
                 } catch (SQLException ex) {
@@ -448,6 +471,14 @@ public class IncidentViewController {
             try {
                 boolean ok = incidentDAO.delete(selectedIncident.getId());
                 if (ok) {
+                    IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                            IncidentEvent.EventType.INCIDENT_DELETED,
+                            selectedIncident.getId(),
+                            selectedIncident.getStatus().name(),
+                            null,
+                            selectedIncident.getAssignedAnalystId(),
+                            "Deleted incident: " + selectedIncident.getTitle()
+                    ));
                     lblStatusMessage.setText("✓ Deleted Incident INC-" + selectedIncident.getId());
                     loadData();
                 }

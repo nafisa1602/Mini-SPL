@@ -1,8 +1,12 @@
 package com.minispl.presentation;
 
+import com.minispl.application.observer.IncidentEvent;
+import com.minispl.application.observer.IncidentEventListener;
+import com.minispl.application.observer.IncidentEventPublisher;
 import com.minispl.domain.enums.IncidentStatus;
 import com.minispl.persistence.dao.EvidenceDAO;
 import com.minispl.persistence.dao.IncidentDAO;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -15,7 +19,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainController {
+public class MainController implements IncidentEventListener {
 
     @FXML private Button btnNavIncidents;
     @FXML private Button btnNavEvidence;
@@ -31,13 +35,24 @@ public class MainController {
     private final EvidenceDAO evidenceDAO = new EvidenceDAO();
 
     private final Map<String, Node> viewCache = new HashMap<>();
+    private final Map<String, Object> controllerCache = new HashMap<>();
     private Button currentActiveButton;
 
     @FXML
     public void initialize() {
+        IncidentEventPublisher.getInstance().subscribe(this);
         updateSidebarStats();
         // Load default view: Incidents
         showIncidents();
+    }
+
+    @Override
+    public void onIncidentEvent(IncidentEvent event) {
+        if (Platform.isFxApplicationThread()) {
+            updateSidebarStats();
+        } else {
+            Platform.runLater(this::updateSidebarStats);
+        }
     }
 
     @FXML
@@ -63,10 +78,14 @@ public class MainController {
     private void switchView(String fxmlPath, Button targetButton) {
         try {
             Node viewNode = viewCache.get(fxmlPath);
+            Object controller = controllerCache.get(fxmlPath);
+
             if (viewNode == null) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
                 viewNode = loader.load();
+                controller = loader.getController();
                 viewCache.put(fxmlPath, viewNode);
+                controllerCache.put(fxmlPath, controller);
             }
 
             contentArea.getChildren().setAll(viewNode);
@@ -78,6 +97,11 @@ public class MainController {
             if (targetButton != null) {
                 targetButton.getStyleClass().add("nav-button-active");
                 currentActiveButton = targetButton;
+            }
+
+            // CRITICAL FIX: Refresh the controller to prevent stale views when switching tabs
+            if (controller instanceof Refreshable r) {
+                r.refresh();
             }
 
             updateSidebarStats();

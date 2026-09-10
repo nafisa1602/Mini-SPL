@@ -1,5 +1,7 @@
 package com.minispl.application.remediation;
 
+import com.minispl.application.observer.IncidentEvent;
+import com.minispl.application.observer.IncidentEventPublisher;
 import com.minispl.domain.enums.AuditStatus;
 import com.minispl.domain.model.ActionAuditLog;
 import com.minispl.persistence.dao.AuditLogDAO;
@@ -10,7 +12,7 @@ import java.util.*;
 /**
  * Command Pattern Invoker: CommandInvoker.
  * Orchestrates execution, rollback/undo, in-memory command history,
- * and persistent logging into SQLite via AuditLogDAO.
+ * persistent logging into SQLite via AuditLogDAO, and observer notifications.
  */
 public class CommandInvoker {
 
@@ -58,6 +60,16 @@ public class CommandInvoker {
                 undoStack.push(command);
                 activeCommandsByAuditId.put(createdLog.getId(), command);
             }
+
+            // 4. Publish observer event
+            IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                    IncidentEvent.EventType.COMMAND_EXECUTED,
+                    command.getIncidentId(),
+                    null,
+                    command.getCommandType(),
+                    command.getExecutedById(),
+                    command.getParameters()
+            ));
 
             return createdLog;
         } catch (Exception e) {
@@ -137,6 +149,15 @@ public class CommandInvoker {
         if (cmd.getAuditLogId() != null) {
             auditLogDAO.updateStatus(cmd.getAuditLogId(), AuditStatus.UNDONE, false);
         }
+
+        IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                IncidentEvent.EventType.COMMAND_UNDONE,
+                cmd.getIncidentId(),
+                cmd.getCommandType(),
+                "UNDONE",
+                cmd.getExecutedById(),
+                "Rolled back " + cmd.getCommandType()
+        ));
     }
 
     public boolean canUndo() {

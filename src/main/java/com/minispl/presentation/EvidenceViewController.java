@@ -1,6 +1,9 @@
 package com.minispl.presentation;
 
 import com.minispl.application.evidence.EvidenceCustodyStateMachine;
+import com.minispl.application.observer.IncidentEvent;
+import com.minispl.application.observer.IncidentEventListener;
+import com.minispl.application.observer.IncidentEventPublisher;
 import com.minispl.domain.enums.CustodyStatus;
 import com.minispl.domain.model.Asset;
 import com.minispl.domain.model.EvidenceItem;
@@ -10,6 +13,7 @@ import com.minispl.persistence.dao.AssetDAO;
 import com.minispl.persistence.dao.EvidenceDAO;
 import com.minispl.persistence.dao.IncidentDAO;
 import com.minispl.persistence.dao.UserDAO;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,7 +31,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public class EvidenceViewController {
+public class EvidenceViewController implements Refreshable, IncidentEventListener {
 
     @FXML private TableView<EvidenceItem> tblEvidence;
     @FXML private TableColumn<EvidenceItem, Integer> colId;
@@ -83,10 +87,21 @@ public class EvidenceViewController {
         tblEvidence.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> showDetail(newVal));
         tblEvidence.setItems(evidenceList);
 
+        IncidentEventPublisher.getInstance().subscribe(this);
         loadData();
     }
 
+    @Override
+    public void onIncidentEvent(IncidentEvent event) {
+        if (Platform.isFxApplicationThread()) {
+            refresh();
+        } else {
+            Platform.runLater(this::refresh);
+        }
+    }
+
     @FXML
+    @Override
     public void refresh() {
         loadData();
     }
@@ -349,6 +364,14 @@ public class EvidenceViewController {
                 try {
                     EvidenceItem created = evidenceDAO.create(item);
                     lblCustodyMessage.setText("✓ Cataloged Evidence Item #" + created.getId() + " in SEIZED custody state.");
+                    IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                            IncidentEvent.EventType.EVIDENCE_CREATED,
+                            created.getIncidentId(),
+                            null,
+                            created.getCustodyStatus().name(),
+                            created.getCurrentCustodianId(),
+                            "Cataloged evidence artifact: " + created.getEvidenceName()
+                    ));
                     loadData();
                     tblEvidence.getSelectionModel().select(created);
                 } catch (SQLException ex) {
@@ -375,6 +398,14 @@ public class EvidenceViewController {
             try {
                 boolean ok = evidenceDAO.delete(selectedItem.getId());
                 if (ok) {
+                    IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                            IncidentEvent.EventType.EVIDENCE_DELETED,
+                            selectedItem.getIncidentId(),
+                            selectedItem.getCustodyStatus().name(),
+                            null,
+                            selectedItem.getCurrentCustodianId(),
+                            "Deleted evidence artifact: " + selectedItem.getEvidenceName()
+                    ));
                     lblCustodyMessage.setText("✓ Deleted Artifact #" + selectedItem.getId());
                     loadData();
                 }

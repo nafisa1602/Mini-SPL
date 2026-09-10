@@ -1,5 +1,7 @@
 package com.minispl.application.incident;
 
+import com.minispl.application.observer.IncidentEvent;
+import com.minispl.application.observer.IncidentEventPublisher;
 import com.minispl.domain.enums.IncidentStatus;
 import com.minispl.domain.model.Incident;
 import com.minispl.persistence.dao.IncidentDAO;
@@ -10,7 +12,7 @@ import java.util.List;
 /**
  * State Pattern Context: IncidentStateMachine.
  * Wraps an Incident domain entity and delegates lifecycle operations to its current IncidentState.
- * Updates SQLite via IncidentDAO upon each valid transition.
+ * Updates SQLite via IncidentDAO upon each valid transition and notifies observers.
  */
 public class IncidentStateMachine {
 
@@ -69,20 +71,47 @@ public class IncidentStateMachine {
      * Executes transition: NEW -> TRIAGED
      */
     public void triage(Integer playbookId, Integer analystId) throws SQLException {
+        IncidentStatus oldStatus = getStatus();
         currentState.triage(this, playbookId, analystId);
+        IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                IncidentEvent.EventType.INCIDENT_STATE_CHANGED,
+                incident.getId(),
+                oldStatus.name(),
+                getStatus().name(),
+                analystId != null ? analystId : incident.getAssignedAnalystId(),
+                "Incident triaged into phase " + incident.getCurrentPhase()
+        ));
     }
 
     /**
      * Executes transition: TRIAGED -> CONTAINED
      */
     public void contain() throws SQLException {
+        IncidentStatus oldStatus = getStatus();
         currentState.contain(this);
+        IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                IncidentEvent.EventType.INCIDENT_STATE_CHANGED,
+                incident.getId(),
+                oldStatus.name(),
+                getStatus().name(),
+                incident.getAssignedAnalystId(),
+                "Incident contained into phase " + incident.getCurrentPhase()
+        ));
     }
 
     /**
      * Executes transition: CONTAINED -> CLOSED
      */
     public void close() throws SQLException {
+        IncidentStatus oldStatus = getStatus();
         currentState.close(this);
+        IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                IncidentEvent.EventType.INCIDENT_STATE_CHANGED,
+                incident.getId(),
+                oldStatus.name(),
+                getStatus().name(),
+                incident.getAssignedAnalystId(),
+                "Incident closed"
+        ));
     }
 }
