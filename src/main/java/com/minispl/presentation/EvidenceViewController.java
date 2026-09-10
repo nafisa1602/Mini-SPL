@@ -4,6 +4,7 @@ import com.minispl.application.evidence.EvidenceCustodyStateMachine;
 import com.minispl.application.observer.IncidentEvent;
 import com.minispl.application.observer.IncidentEventListener;
 import com.minispl.application.observer.IncidentEventPublisher;
+import com.minispl.application.strategy.*;
 import com.minispl.domain.enums.CustodyStatus;
 import com.minispl.domain.model.Asset;
 import com.minispl.domain.model.EvidenceItem;
@@ -24,7 +25,11 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.SQLException;
@@ -60,6 +65,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
     @FXML private Button btnArchiveArtifact;
     @FXML private Label lblArchivedNotice;
     @FXML private Button btnDeleteEvidence;
+    @FXML private Button btnVerifyIntegrity;
 
     private final EvidenceDAO evidenceDAO = new EvidenceDAO();
     private final IncidentDAO incidentDAO = new IncidentDAO();
@@ -187,7 +193,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.beginAnalysis(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: SEIZED -> IN_ANALYSIS");
+            lblCustodyMessage.setText("Custody Transition: SEIZED -> IN_ANALYSIS");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -200,7 +206,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.placeOnCourtHold(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: IN_ANALYSIS -> COURT_HOLD (Judicial Freeze)");
+            lblCustodyMessage.setText("Custody Transition: IN_ANALYSIS -> COURT_HOLD (Judicial Freeze)");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -213,7 +219,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.releaseFromCourtHold(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: COURT_HOLD -> IN_ANALYSIS (Hold Released)");
+            lblCustodyMessage.setText("Custody Transition: COURT_HOLD -> IN_ANALYSIS (Hold Released)");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -226,7 +232,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
         try {
             EvidenceCustodyStateMachine machine = new EvidenceCustodyStateMachine(selectedItem, evidenceDAO);
             machine.archive(selectedItem.getCurrentCustodianId());
-            lblCustodyMessage.setText("✓ Custody Transition: -> ARCHIVED (Cold Vault Sealed)");
+            lblCustodyMessage.setText("Custody Transition: -> ARCHIVED (Cold Vault Sealed)");
             refresh();
         } catch (Exception e) {
             showError("Custody State Error", e.getMessage());
@@ -303,7 +309,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
             txtHash.setPromptText("SHA-256 Hash hex string");
             txtHash.setText(generateDemoSha256("artifact-" + System.currentTimeMillis()));
 
-            Button btnGenHash = new Button("⚡ Generate Random Hash");
+            Button btnGenHash = new Button("Generate Random Hash");
             btnGenHash.setStyle("-fx-font-size: 11px;");
             btnGenHash.setOnAction(e -> txtHash.setText(generateDemoSha256(txtName.getText() + System.nanoTime())));
 
@@ -363,7 +369,7 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
             res.ifPresent(item -> {
                 try {
                     EvidenceItem created = evidenceDAO.create(item);
-                    lblCustodyMessage.setText("✓ Cataloged Evidence Item #" + created.getId() + " in SEIZED custody state.");
+                    lblCustodyMessage.setText("Cataloged Evidence Item #" + created.getId() + " in SEIZED custody state.");
                     IncidentEventPublisher.getInstance().publish(new IncidentEvent(
                             IncidentEvent.EventType.EVIDENCE_CREATED,
                             created.getIncidentId(),
@@ -406,13 +412,119 @@ public class EvidenceViewController implements Refreshable, IncidentEventListene
                             selectedItem.getCurrentCustodianId(),
                             "Deleted evidence artifact: " + selectedItem.getEvidenceName()
                     ));
-                    lblCustodyMessage.setText("✓ Deleted Artifact #" + selectedItem.getId());
+                    lblCustodyMessage.setText("Deleted Artifact #" + selectedItem.getId());
                     loadData();
                 }
             } catch (SQLException e) {
                 showError("Delete Error", e.getMessage());
             }
         }
+    }
+
+    @FXML
+    public void handleVerifyIntegrity() {
+        if (selectedItem == null) {
+            showError("No Selection", "Please select a digital forensic artifact from the table to verify.");
+            return;
+        }
+
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Cryptographic Integrity Verifier (SHA-256)");
+        dialog.setHeaderText("Verifying Artifact: " + selectedItem.getEvidenceName() + " (ID #" + selectedItem.getId() + ")");
+
+        ButtonType btnVerify = new ButtonType("Run Verification", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnVerify, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 10));
+
+        Label lblExpected = new Label(selectedItem.getFileHash());
+        lblExpected.setStyle("-fx-font-family: monospace; -fx-text-fill: #38bdf8; -fx-font-weight: bold;");
+
+        TextField tfInputHash = new TextField();
+        tfInputHash.setPromptText("Paste expected SHA-256 hash or choose file...");
+        tfInputHash.setPrefWidth(320);
+
+        ComboBox<String> cbAlgo = new ComboBox<>(FXCollections.observableArrayList("SHA-256", "SHA-512"));
+        cbAlgo.setValue("SHA-256");
+
+        Button btnBrowse = new Button("Browse File...");
+        btnBrowse.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select Artifact to Hash & Verify");
+            if (dialog.getDialogPane().getScene() != null && dialog.getDialogPane().getScene().getWindow() != null) {
+                File file = chooser.showOpenDialog(dialog.getDialogPane().getScene().getWindow());
+                if (file != null) {
+                    try {
+                        HashingStrategy strategy = "SHA-512".equalsIgnoreCase(cbAlgo.getValue())
+                                ? new Sha512HashingStrategy()
+                                : new Sha256HashingStrategy();
+                        HashingContext hashingContext = new HashingContext(strategy);
+                        String computed = hashingContext.computeFileHash(file);
+                        tfInputHash.setText(computed);
+                    } catch (Exception ex) {
+                        showError("Hash Error", "Failed to compute file hash: " + ex.getMessage());
+                    }
+                }
+            }
+        });
+
+        HBox inputRow = new HBox(8, tfInputHash, btnBrowse);
+
+        grid.add(new Label("Hashing Strategy:"), 0, 0);
+        grid.add(cbAlgo, 1, 0);
+        grid.add(new Label("Custody Record Hash:"), 0, 1);
+        grid.add(lblExpected, 1, 1);
+        grid.add(new Label("Verification Hash / File:"), 0, 2);
+        grid.add(inputRow, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(btn -> {
+            if (btn == btnVerify) {
+                return tfInputHash.getText().trim();
+            }
+            return null;
+        });
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(hash -> {
+            if (hash.isEmpty()) {
+                showError("Validation Error", "Please provide a hash or select a file to verify.");
+                return;
+            }
+
+            boolean matches = selectedItem.getFileHash().equalsIgnoreCase(hash);
+            if (matches) {
+                IncidentEventPublisher.getInstance().publish(new IncidentEvent(
+                        IncidentEvent.EventType.EVIDENCE_INTEGRITY_VERIFIED,
+                        selectedItem.getIncidentId(),
+                        "UNVERIFIED",
+                        "VERIFIED_MATCH",
+                        1,
+                        "SHA-256 verified for Artifact #" + selectedItem.getId() + " (" + selectedItem.getEvidenceName() + ")"
+                ));
+                lblCustodyMessage.setText("Cryptographic integrity verified: SHA-256 match confirmed.");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Integrity Verified");
+                alert.setHeaderText("Cryptographic Integrity Confirmed");
+                alert.setContentText("Artifact SHA-256 hash matches the database chain of custody ledger perfectly.\n\nHash: " + hash + "\n\nIntegrity Status: UNTAMPERED");
+                alert.showAndWait();
+            } else {
+                lblCustodyMessage.setText("INTEGRITY ALERT: SHA-256 hash mismatch detected!");
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Integrity Warning");
+                alert.setHeaderText("Cryptographic Hash Mismatch Detected!");
+                alert.setContentText("The provided hash does NOT match the stored chain of custody record!\n\nExpected: " + selectedItem.getFileHash() + "\nActual:   " + hash + "\n\nWarning: The evidence artifact may have been modified or corrupted.");
+                alert.showAndWait();
+            }
+        });
+    }
+
+    public static String computeFileSHA256(File file) throws Exception {
+        return new HashingContext(new Sha256HashingStrategy()).computeFileHash(file);
     }
 
     private String generateDemoSha256(String seed) {

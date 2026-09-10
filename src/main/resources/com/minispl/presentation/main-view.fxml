@@ -14,7 +14,7 @@
         <HBox alignment="CENTER_LEFT" spacing="16" styleClass="header-bar">
             <!-- App Branding -->
             <VBox alignment="CENTER_LEFT">
-                <Label text="⚡ DFIR ORCHESTRATOR" styleClass="app-title"/>
+                <Label text="DFIR ORCHESTRATOR" styleClass="app-title"/>
                 <Label text="Desktop Incident Response &amp; Digital Forensics Playbook Engine | Mini-SPL" styleClass="app-subtitle"/>
             </VBox>
 
@@ -22,8 +22,8 @@
 
             <!-- Status Badges -->
             <HBox alignment="CENTER_RIGHT" spacing="12">
-                <Label text="● SQLite: Connected (Foreign Keys Enforced)" styleClass="status-badge-connected"/>
-                <Label text="👤 Active: Alice Walker (Senior Analyst)" styleClass="user-badge"/>
+                <Label text="SQLite: Connected (Foreign Keys Enforced)" styleClass="status-badge-connected"/>
+                <Label text="Active: Alice Walker (Senior Analyst)" styleClass="user-badge"/>
             </HBox>
         </HBox>
     </top>
@@ -33,10 +33,11 @@
         <VBox spacing="10" styleClass="sidebar">
             <Label text="OPERATIONAL CONSOLES" styleClass="detail-label" style="-fx-padding: 0 0 4 8; -fx-text-fill: #64748b;"/>
 
-            <Button fx:id="btnNavIncidents" text="🚨  Incidents &amp; Triage" onAction="#showIncidents" styleClass="nav-button"/>
-            <Button fx:id="btnNavEvidence" text="📦  Evidence &amp; Custody" onAction="#showEvidence" styleClass="nav-button"/>
-            <Button fx:id="btnNavPlaybooks" text="📖  IR Playbooks" onAction="#showPlaybooks" styleClass="nav-button"/>
-            <Button fx:id="btnNavReports" text="📊  Audit &amp; Analytics" onAction="#showReports" styleClass="nav-button"/>
+            <Button fx:id="btnNavIncidents" text="Incidents &amp; Triage" onAction="#showIncidents" styleClass="nav-button"/>
+            <Button fx:id="btnNavEvidence" text="Evidence &amp; Custody" onAction="#showEvidence" styleClass="nav-button"/>
+            <Button fx:id="btnNavAssets" text="Assets &amp; Inventory" onAction="#showAssets" styleClass="nav-button"/>
+            <Button fx:id="btnNavPlaybooks" text="IR Playbooks" onAction="#showPlaybooks" styleClass="nav-button"/>
+            <Button fx:id="btnNavReports" text="Audit &amp; Analytics" onAction="#showReports" styleClass="nav-button"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
@@ -52,6 +53,11 @@
                     <Label text="Forensic Items:" styleClass="detail-label" HBox.hgrow="ALWAYS"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label fx:id="lblSidebarEvidenceCount" text="0 Items" styleClass="detail-value" style="-fx-font-weight: bold;"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Endpoints:" styleClass="detail-label" HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblSidebarAssetCount" text="0 Hosts" styleClass="detail-value" style="-fx-font-weight: bold;"/>
                 </HBox>
             </VBox>
         </VBox>

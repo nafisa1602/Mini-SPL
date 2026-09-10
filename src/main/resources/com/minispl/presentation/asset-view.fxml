@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="16" styleClass="content-area" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.minispl.presentation.AssetViewController">
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Infrastructure Assets &amp; Network Inventory" styleClass="view-title"/>
+            <Label text="Endpoint registration, criticality tiering, quarantine controls, and inventory CRUD" styleClass="view-subtitle"/>
+        </VBox>
+        <Button text="+ Register Asset" onAction="#handleNewAsset" styleClass="btn-primary"/>
+        <Button text="Refresh" onAction="#refresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="TOTAL ASSETS" styleClass="stat-label"/>
+            <Label fx:id="lblTotalAssets" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="MISSION CRITICAL (TIER 1)" styleClass="stat-label"/>
+            <Label fx:id="lblTier1Assets" text="0" styleClass="stat-value" style="-fx-text-fill: #f87171;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="QUARANTINED / ISOLATED" styleClass="stat-label"/>
+            <Label fx:id="lblIsolatedAssets" text="0" styleClass="stat-value" style="-fx-text-fill: #fbbf24;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="ONLINE HOSTS" styleClass="stat-label"/>
+            <Label fx:id="lblOnlineAssets" text="0" styleClass="stat-value" style="-fx-text-fill: #34d399;"/>
+        </VBox>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="Status:" styleClass="detail-label"/>
+        <ComboBox fx:id="cbStatusFilter" prefWidth="150" styleClass="combo-box"/>
+        <Label text="Search:" styleClass="detail-label"/>
+        <TextField fx:id="txtSearch" promptText="Filter by hostname, IP, description..." prefWidth="250" styleClass="text-field"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblStatusMessage" text="" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-style: italic;"/>
+    </HBox>
+
+    <SplitPane dividerPositions="0.65" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+        <TableView fx:id="tblAssets" styleClass="table-view">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                <TableColumn fx:id="colHostname" text="Hostname" prefWidth="180"/>
+                <TableColumn fx:id="colIp" text="IP Address" prefWidth="130"/>
+                <TableColumn fx:id="colCriticality" text="Criticality Tier" prefWidth="170"/>
+                <TableColumn fx:id="colStatus" text="Network Status" prefWidth="120"/>
+                <TableColumn fx:id="colDescription" text="Description / Role" prefWidth="220"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+
+        <VBox fx:id="detailPane" spacing="14" styleClass="card" style="-fx-padding: 16;">
+            <Label text="ASSET DOSSIER &amp; CONTROLS" styleClass="section-header"/>
+
+            <VBox spacing="4">
+                <Label text="HOSTNAME" styleClass="detail-label"/>
+                <Label fx:id="lblDetailHostname" text="No asset selected" styleClass="detail-value" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;"/>
+            </VBox>
+
+            <VBox spacing="4">
+                <Label text="IP ADDRESS" styleClass="detail-label"/>
+                <Label fx:id="lblDetailIp" text="-" styleClass="detail-value"/>
+            </VBox>
+
+            <VBox spacing="4">
+                <Label text="CRITICALITY TIER" styleClass="detail-label"/>
+                <Label fx:id="lblDetailCriticality" text="-" styleClass="detail-value"/>
+            </VBox>
+
+            <VBox spacing="4">
+                <Label text="NETWORK STATUS" styleClass="detail-label"/>
+                <Label fx:id="lblDetailStatus" text="-" styleClass="detail-value"/>
+            </VBox>
+
+            <VBox spacing="4">
+                <Label text="DESCRIPTION &amp; PURPOSE" styleClass="detail-label"/>
+                <Label fx:id="lblDetailDescription" text="-" styleClass="detail-value" wrapText="true"/>
+            </VBox>
+
+            <Separator style="-fx-background-color: #334155;"/>
+
+            <Label text="ASSET OPERATIONS" styleClass="detail-label"/>
+            <HBox spacing="8">
+                <Button fx:id="btnToggleQuarantine" text="Quarantine Host" onAction="#handleToggleQuarantine" styleClass="btn-danger" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnEditAsset" text="Edit Details" onAction="#handleEditAsset" styleClass="btn-secondary" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <Button fx:id="btnDeleteAsset" text="Decommission Asset" onAction="#handleDeleteAsset" styleClass="btn-secondary" style="-fx-text-fill: #ef4444; -fx-border-color: #ef4444;" maxWidth="Infinity"/>
+        </VBox>
+    </SplitPane>
+
+</VBox>

@@ -46,6 +46,8 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
     @FXML private Label lblClosed;
 
     @FXML private ComboBox<String> cbFilter;
+    @FXML private ComboBox<String> cbSeverityFilter;
+    @FXML private TextField txtSearch;
     @FXML private TableView<Incident> tblIncidents;
     @FXML private TableColumn<Incident, Integer> colId;
     @FXML private TableColumn<Incident, String> colTitle;
@@ -100,6 +102,16 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         cbFilter.setItems(FXCollections.observableArrayList("ALL", "NEW", "TRIAGED", "CONTAINED", "CLOSED"));
         cbFilter.setValue("ALL");
         cbFilter.setOnAction(e -> applyFilter());
+
+        if (cbSeverityFilter != null) {
+            cbSeverityFilter.setItems(FXCollections.observableArrayList("ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"));
+            cbSeverityFilter.setValue("ALL");
+            cbSeverityFilter.setOnAction(e -> applyFilter());
+        }
+
+        if (txtSearch != null) {
+            txtSearch.textProperty().addListener((obs, oldVal, newVal) -> applyFilter());
+        }
 
         colId.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
         colTitle.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTitle()));
@@ -158,14 +170,30 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
     private void applyFilter() {
         try {
             int selectedId = selectedIncident != null ? selectedIncident.getId() : -1;
-            String filter = cbFilter.getValue();
-            List<Incident> list;
-            if (filter == null || "ALL".equalsIgnoreCase(filter)) {
-                list = incidentDAO.findAll();
-            } else {
-                list = incidentDAO.findByStatus(IncidentStatus.valueOf(filter));
-            }
-            incidentList.setAll(list);
+            String statusFilter = cbFilter.getValue();
+            String sevFilter = cbSeverityFilter != null ? cbSeverityFilter.getValue() : "ALL";
+            String query = txtSearch != null && txtSearch.getText() != null ? txtSearch.getText().trim().toLowerCase() : "";
+
+            List<Incident> list = incidentDAO.findAll();
+
+            List<Incident> filtered = list.stream().filter(inc -> {
+                if (statusFilter != null && !"ALL".equalsIgnoreCase(statusFilter)) {
+                    if (!inc.getStatus().name().equalsIgnoreCase(statusFilter)) return false;
+                }
+                if (sevFilter != null && !"ALL".equalsIgnoreCase(sevFilter)) {
+                    if (!inc.getSeverity().name().equalsIgnoreCase(sevFilter)) return false;
+                }
+                if (!query.isEmpty()) {
+                    boolean mTitle = inc.getTitle() != null && inc.getTitle().toLowerCase().contains(query);
+                    boolean mThreat = inc.getThreatType() != null && inc.getThreatType().toLowerCase().contains(query);
+                    boolean mAsset = inc.getAssetHostname() != null && inc.getAssetHostname().toLowerCase().contains(query);
+                    boolean mAnalyst = inc.getAnalystName() != null && inc.getAnalystName().toLowerCase().contains(query);
+                    return mTitle || mThreat || mAsset || mAnalyst;
+                }
+                return true;
+            }).toList();
+
+            incidentList.setAll(filtered);
 
             // Re-select prior selection or first item
             if (!incidentList.isEmpty()) {
@@ -175,7 +203,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                 showDetail(null);
             }
         } catch (SQLException e) {
-            showError("Database Error", e.getMessage());
+            showError("Database Error", "Failed to load incidents: " + e.getMessage());
         }
     }
 
@@ -252,7 +280,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         try {
             IncidentStateMachine machine = new IncidentStateMachine(selectedIncident, incidentDAO);
             machine.triage(selectedIncident.getPlaybookId(), selectedIncident.getAssignedAnalystId());
-            lblStatusMessage.setText("✓ State Transition: NEW -> TRIAGED (Phase: CONTAINMENT)");
+            lblStatusMessage.setText("State Transition: NEW -> TRIAGED (Phase: CONTAINMENT)");
             refresh();
         } catch (Exception e) {
             showError("State Machine Error", e.getMessage());
@@ -265,7 +293,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         try {
             IncidentStateMachine machine = new IncidentStateMachine(selectedIncident, incidentDAO);
             machine.contain();
-            lblStatusMessage.setText("✓ State Transition: TRIAGED -> CONTAINED (Phase: EVIDENCE_COLLECTION)");
+            lblStatusMessage.setText("State Transition: TRIAGED -> CONTAINED (Phase: EVIDENCE_COLLECTION)");
             refresh();
         } catch (Exception e) {
             showError("State Machine Error", e.getMessage());
@@ -278,7 +306,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
         try {
             IncidentStateMachine machine = new IncidentStateMachine(selectedIncident, incidentDAO);
             machine.close();
-            lblStatusMessage.setText("✓ State Transition: CONTAINED -> CLOSED (Case Resolved)");
+            lblStatusMessage.setText("State Transition: CONTAINED -> CLOSED (Case Resolved)");
             refresh();
         } catch (Exception e) {
             showError("State Machine Error", e.getMessage());
@@ -436,7 +464,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
             result.ifPresent(inc -> {
                 try {
                     Incident created = incidentDAO.create(inc);
-                    lblStatusMessage.setText("✓ Created Incident INC-" + created.getId() + " with Risk Score " + created.getRiskScore());
+                    lblStatusMessage.setText("Created Incident INC-" + created.getId() + " with Risk Score " + created.getRiskScore());
                     IncidentEventPublisher.getInstance().publish(new IncidentEvent(
                             IncidentEvent.EventType.INCIDENT_CREATED,
                             created.getId(),
@@ -479,7 +507,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                             selectedIncident.getAssignedAnalystId(),
                             "Deleted incident: " + selectedIncident.getTitle()
                     ));
-                    lblStatusMessage.setText("✓ Deleted Incident INC-" + selectedIncident.getId());
+                    lblStatusMessage.setText("Deleted Incident INC-" + selectedIncident.getId());
                     loadData();
                 }
             } catch (SQLException e) {
@@ -507,7 +535,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
             RemediationCommand cmd = commandFactory.createCommand(IsolateHostCommand.COMMAND_TYPE, selectedIncident.getId(), analystId, params);
             commandInvoker.execute(cmd);
 
-            lblStatusMessage.setText("✓ Action Executed: " + cmd.getStatusMessage());
+            lblStatusMessage.setText("Action Executed: " + cmd.getStatusMessage());
             btnUndoCommand.setDisable(false);
             refresh();
         } catch (Exception e) {
@@ -535,7 +563,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                 RemediationCommand cmd = commandFactory.createCommand(BlockIPCommand.COMMAND_TYPE, selectedIncident.getId(), analystId, params);
                 commandInvoker.execute(cmd);
 
-                lblStatusMessage.setText("✓ Action Executed: " + cmd.getStatusMessage());
+                lblStatusMessage.setText("Action Executed: " + cmd.getStatusMessage());
                 btnUndoCommand.setDisable(false);
                 refresh();
             } catch (Exception e) {
@@ -563,7 +591,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
                 RemediationCommand cmd = commandFactory.createCommand(RevokeCredentialsCommand.COMMAND_TYPE, selectedIncident.getId(), analystId, params);
                 commandInvoker.execute(cmd);
 
-                lblStatusMessage.setText("✓ Action Executed: " + cmd.getStatusMessage());
+                lblStatusMessage.setText("Action Executed: " + cmd.getStatusMessage());
                 btnUndoCommand.setDisable(false);
                 refresh();
             } catch (Exception e) {
@@ -576,7 +604,7 @@ public class IncidentViewController implements Refreshable, IncidentEventListene
     public void handleUndoCommand() {
         try {
             RemediationCommand undone = commandInvoker.undoLast();
-            lblStatusMessage.setText("↺ Rollback Executed: " + undone.getStatusMessage());
+            lblStatusMessage.setText("Rollback Executed: " + undone.getStatusMessage());
             btnUndoCommand.setDisable(!commandInvoker.canUndo());
             refresh();
         } catch (Exception e) {

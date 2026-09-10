@@ -12,7 +12,9 @@
             <Label text="Security Operations Analytics &amp; Action Audit Trail (Person B)" styleClass="view-title"/>
             <Label text="Command pattern execution ledger, reversible rollback engine, and containment metrics" styleClass="view-subtitle"/>
         </VBox>
-        <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
+        <Button text="Export Dossier (.md)" onAction="#handleExportDossier" styleClass="btn-primary"/>
+        <Button text="Export CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
+        <Button text="Refresh" onAction="#refresh" styleClass="btn-secondary"/>
     </HBox>
 
     <HBox spacing="12">
@@ -34,7 +36,7 @@
         <Label text="COMMAND EXECUTION &amp; ROLLBACK AUDIT LOG" styleClass="detail-label"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Label fx:id="lblRollbackMessage" text="" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-style: italic;"/>
-        <Button fx:id="btnRollbackSelected" text="↺ Rollback Selected Action" onAction="#handleRollbackSelected" styleClass="btn-danger"/>
+        <Button fx:id="btnRollbackSelected" text="Rollback Selected Action" onAction="#handleRollbackSelected" styleClass="btn-danger"/>
     </HBox>
 
     <TableView fx:id="tblAuditLogs" VBox.vgrow="ALWAYS" styleClass="table-view">

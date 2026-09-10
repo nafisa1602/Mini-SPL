@@ -60,6 +60,11 @@ public class FXMLLoadingTest {
         assertFXMLParses("/com/minispl/presentation/reports-view.fxml");
     }
 
+    @Test
+    public void testAssetViewFXML() throws Exception {
+        assertFXMLParses("/com/minispl/presentation/asset-view.fxml");
+    }
+
     private void assertFXMLParses(String resourcePath) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(false);

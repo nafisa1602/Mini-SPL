@@ -17,7 +17,11 @@ public class IncidentEvent {
         INCIDENT_DELETED,
         EVIDENCE_CREATED,
         EVIDENCE_DELETED,
-        PLAYBOOK_EXECUTED
+        PLAYBOOK_EXECUTED,
+        ASSET_CREATED,
+        ASSET_UPDATED,
+        ASSET_DELETED,
+        EVIDENCE_INTEGRITY_VERIFIED
     }
 
     private final EventType type;

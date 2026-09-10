@@ -27,7 +27,7 @@
                         <Label fx:id="lblPlaybookTitle" text="Select Playbook" styleClass="view-title" style="-fx-font-size: 16px;"/>
                         <Label fx:id="lblPlaybookDescription" text="Description" styleClass="detail-value" wrapText="true"/>
                     </VBox>
-                    <Button fx:id="btnExecutePlaybook" text="▶ Run Engine (Template Method)" onAction="#handleExecutePlaybook" styleClass="btn-primary"/>
+                    <Button fx:id="btnExecutePlaybook" text="Run Engine (Template Method)" onAction="#handleExecutePlaybook" styleClass="btn-primary"/>
                 </HBox>
                 <Label fx:id="lblExecutionStatus" text="" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-style: italic;"/>
             </VBox>

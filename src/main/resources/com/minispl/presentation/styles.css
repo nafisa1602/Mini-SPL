@@ -326,3 +326,18 @@
     -fx-background-color: #334155;
 }
 
+.card {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.section-header {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #38bdf8;
+    -fx-padding: 0 0 6 0;
+}
+
+

@@ -14,10 +14,14 @@
             <Label text="Incident Lifecycle State Machine, Pluggable Risk Strategy &amp; Remediation Commands" styleClass="view-subtitle"/>
         </VBox>
         <HBox alignment="CENTER_RIGHT" spacing="10">
-            <Button text="＋ Create Incident" onAction="#handleCreateIncident" styleClass="btn-primary"/>
-            <Label text="Filter Status:" styleClass="detail-label"/>
-            <ComboBox fx:id="cbFilter" prefWidth="130"/>
-            <Button text="⟳ Refresh" onAction="#refresh" styleClass="btn-secondary"/>
+            <Button text="+ Create Incident" onAction="#handleCreateIncident" styleClass="btn-primary"/>
+            <Label text="Search:" styleClass="detail-label"/>
+            <TextField fx:id="txtSearch" promptText="Search title, threat, host..." prefWidth="180" styleClass="text-field"/>
+            <Label text="Status:" styleClass="detail-label"/>
+            <ComboBox fx:id="cbFilter" prefWidth="120" styleClass="combo-box"/>
+            <Label text="Severity:" styleClass="detail-label"/>
+            <ComboBox fx:id="cbSeverityFilter" prefWidth="120" styleClass="combo-box"/>
+            <Button text="Refresh" onAction="#refresh" styleClass="btn-secondary"/>
         </HBox>
     </HBox>
 
@@ -110,10 +114,10 @@
             <!-- State Pattern Transitions: strictly shows valid next transitions -->
             <HBox fx:id="stateTransitionBox" alignment="CENTER_LEFT" spacing="8">
                 <Label text="State Machine:" styleClass="detail-label" style="-fx-text-fill: #a855f7;"/>
-                <Button fx:id="btnTriage" text="→ Advance to Triaged" onAction="#handleTriageTransition" styleClass="btn-primary"/>
-                <Button fx:id="btnContain" text="→ Mark Contained" onAction="#handleContainTransition" styleClass="btn-warning"/>
-                <Button fx:id="btnClose" text="✔ Close Incident" onAction="#handleCloseTransition" styleClass="btn-success"/>
-                <Label fx:id="lblClosedNotice" text="✔ Investigation Closed (Terminal State)" style="-fx-text-fill: #34d399; -fx-font-weight: bold;"/>
+                <Button fx:id="btnTriage" text="Advance to Triaged" onAction="#handleTriageTransition" styleClass="btn-primary"/>
+                <Button fx:id="btnContain" text="Mark Contained" onAction="#handleContainTransition" styleClass="btn-warning"/>
+                <Button fx:id="btnClose" text="Close Incident" onAction="#handleCloseTransition" styleClass="btn-success"/>
+                <Label fx:id="lblClosedNotice" text="Investigation Closed (Terminal State)" style="-fx-text-fill: #34d399; -fx-font-weight: bold;"/>
             </HBox>
 
             <Separator orientation="VERTICAL" style="-fx-background-color: #334155;"/>
@@ -121,16 +125,16 @@
             <!-- Command Pattern Actions (Executed & Undoable) -->
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Label text="Remediation Commands:" styleClass="detail-label" style="-fx-text-fill: #38bdf8;"/>
-                <Button fx:id="btnIsolateHost" text="⚡ Isolate Host" onAction="#handleIsolateHostCommand" styleClass="btn-action"/>
-                <Button fx:id="btnBlockIP" text="🛡 Block IP" onAction="#handleBlockIPCommand" styleClass="btn-action"/>
-                <Button fx:id="btnRevokeCreds" text="🔒 Revoke Creds" onAction="#handleRevokeCredsCommand" styleClass="btn-action"/>
-                <Button fx:id="btnUndoCommand" text="↺ Rollback Action" onAction="#handleUndoCommand" styleClass="btn-secondary"/>
+                <Button fx:id="btnIsolateHost" text="Isolate Host" onAction="#handleIsolateHostCommand" styleClass="btn-action"/>
+                <Button fx:id="btnBlockIP" text="Block IP" onAction="#handleBlockIPCommand" styleClass="btn-action"/>
+                <Button fx:id="btnRevokeCreds" text="Revoke Creds" onAction="#handleRevokeCredsCommand" styleClass="btn-action"/>
+                <Button fx:id="btnUndoCommand" text="Rollback Action" onAction="#handleUndoCommand" styleClass="btn-secondary"/>
             </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>
 
             <!-- Delete Incident -->
-            <Button fx:id="btnDelete" text="🗑 Delete" onAction="#handleDeleteIncident" styleClass="btn-danger"/>
+            <Button fx:id="btnDelete" text="Delete" onAction="#handleDeleteIncident" styleClass="btn-danger"/>
         </HBox>
     </VBox>
 
